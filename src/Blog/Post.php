@@ -4,25 +4,23 @@ namespace Veliafar\PhpBlog\Blog;
 
 class Post
 {
-  public function __construct(private string $id, private User $user, private string $header, private string $text)
+  public function __construct(private UUID $uuid, private User $user, private string $title, private string $text)
   {
   }
 
-  /**
-   * @return string
-   */
-  public function getId(): string
+
+  public function uuid(): UUID
   {
-    return $this->id;
+    return $this->uuid;
   }
 
   public function getUser(): User {
     return $this->user;
   }
 
-  public function getHeader(): string
+  public function getTitle(): string
   {
-    return $this->header;
+    return $this->title;
   }
 
   public function getText(): string
@@ -30,8 +28,30 @@ class Post
     return $this->text;
   }
 
+
+  public function setUser(User $user): Post
+  {
+    $this->user = $user;
+    return $this;
+  }
+
+
+  public function setTitle(string $title): Post
+  {
+    $this->title = $title;
+    return $this;
+  }
+
+  public function setText(string $text): Post
+  {
+    $this->text = $text;
+    return $this;
+  }
+
+
+
   public function __toString(): string
   {
-    return PHP_EOL . $this->user . ' пишет: ' . PHP_EOL  . $this->header . PHP_EOL . $this->text;
+    return PHP_EOL . $this->user . ' пишет: ' . PHP_EOL  . $this->title . PHP_EOL . $this->text;
   }
 }

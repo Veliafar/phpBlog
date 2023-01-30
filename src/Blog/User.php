@@ -4,26 +4,41 @@ namespace Veliafar\PhpBlog\Blog;
 
 class User
 {
-  public function __construct(private string $id, private Name $name, private string $login)
+  public function __construct(private UUID $uuid, private Name $name, private string $username)
   {
   }
 
-  public function id(): string
+  public function uuid(): UUID
   {
-    return $this->id;
+    return $this->uuid;
   }
 
-  public function login(): string {
-    return $this->login;
+  public function username(): string
+  {
+    return $this->username;
   }
 
-  public function name(): string {
+  public function name(): Name
+  {
     return $this->name;
+  }
+
+
+  public function setName(Name $name): User
+  {
+    $this->name = $name;
+    return $this;
+  }
+
+  public function setLogin(string $username): User
+  {
+    $this->username = $username;
+    return $this;
   }
 
 
   public function __toString(): string
   {
-    return "Пользователь $this->id с именем  $this->name и логином $this->login";
+    return "Пользователь $this->uuid с именем  $this->name и логином $this->username";
   }
 }

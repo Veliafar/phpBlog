@@ -8,15 +8,28 @@ class Name
   {
   }
 
-  public function firstName(): string
+  public function first(): string
   {
     return $this->firstName;
   }
 
-  public function lastName(): string
+  public function last(): string
   {
     return $this->lastName;
   }
+
+  public function setFirst(string $firstName): Name
+  {
+    $this->firstName = $firstName;
+    return $this;
+  }
+
+  public function setLast(string $lastName): Name
+  {
+    $this->lastName = $lastName;
+    return $this;
+  }
+
 
   public function __toString(): string
   {

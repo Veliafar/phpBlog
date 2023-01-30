@@ -4,13 +4,13 @@ namespace Veliafar\PhpBlog\Blog;
 
 class Comment
 {
-  public function __construct(private string $id, private Post $post, private User $user, private string $text)
+  public function __construct(private UUID $uuid, private Post $post, private User $user, private string $text)
   {
   }
 
-  public function id(): string
+  public function uuid(): UUID
   {
-    return $this->id;
+    return $this->uuid;
   }
 
   /**
@@ -37,12 +37,37 @@ class Comment
     return $this->user;
   }
 
-  public function getPostID(): string {
-    return $this->post->getId();
+
+  public function setUUID(UUID $uuid): Comment
+  {
+    $this->uuid = $uuid;
+    return $this;
   }
+
+
+  public function setPost(Post $post): Comment
+  {
+    $this->post = $post;
+    return $this;
+  }
+
+
+  public function setUser(User $user): Comment
+  {
+    $this->user = $user;
+    return $this;
+  }
+
+
+  public function setText(string $text): Comment
+  {
+    $this->text = $text;
+    return $this;
+  }
+
 
   public function __toString(): string
   {
-    return "комментарий с ID $this->id текст: $this->text" . PHP_EOL . "для поста: $this->post";
+    return "комментарий с ID $this->uuid текст: $this->text" . PHP_EOL . "для поста: $this->post";
   }
 }
