@@ -1,25 +1,26 @@
 <?php
 
-use Veliafar\PhpBlog\Article\Article;
-use Veliafar\PhpBlog\Comment\Comment;
-use Veliafar\PhpBlog\User\User;
+use Veliafar\PhpBlog\Blog\Comment;
+use Veliafar\PhpBlog\Blog\Name;
+use Veliafar\PhpBlog\Blog\Post;
+use Veliafar\PhpBlog\Blog\User;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+$faker = Faker\Factory::create('ru_RU');
+$user = new User($faker->uuid(), new Name($faker->firstName(), $faker->lastName()), $faker->word());
+
+//$userRepository = new InMemoryUsersRepository();
+
 if ($argv[1] === 'user') {
-  $faker = Faker\Factory::create();
-  echo PHP_EOL . new User($faker->uuid(), $faker->firstName(), $faker->lastName());
+  echo PHP_EOL . $user;
 }
 
 if ($argv[1] === 'post') {
-  $faker = Faker\Factory::create();
-  $user =  new User($faker->uuid(), $faker->firstName(), $faker->lastName());
-  echo new Article($faker->uuid(), $user->getId(), $faker->text(10), $faker->text(100));
+  echo new Post($faker->uuid(), $user, $faker->realText(10), $faker->realText(100));
 }
 
 if ($argv[1] === 'comment') {
-  $faker = Faker\Factory::create();
-  $user =  new User($faker->uuid(), $faker->firstName(), $faker->lastName());
-  $article =  new Article($faker->uuid(), $user->getId(), $faker->text(10), $faker->text(100));
-  echo new Comment($faker->uuid(), $user->getId(), $article->getId(), $faker->text(50));
+  $post = new Post($faker->uuid(), $user, $faker->realText(10), $faker->realText(100));
+  echo new Comment($faker->uuid(), $post, $user, $faker->realText(50));
 }
