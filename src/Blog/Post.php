@@ -18,6 +18,10 @@ class Post
     return $this->user;
   }
 
+  public function getUserUUID(): UUID {
+    return $this->user->uuid();
+  }
+
   public function getTitle(): string
   {
     return $this->title;

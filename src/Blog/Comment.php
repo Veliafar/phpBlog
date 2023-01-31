@@ -29,12 +29,20 @@ class Comment
     return $this->post;
   }
 
+  public function getPostUUID(): UUID {
+    return $this->post->uuid();
+  }
+
   /**
    * @return User
    */
   public function getUser(): User
   {
     return $this->user;
+  }
+
+  public function getUserUUID(): UUID {
+    return $this->user->uuid();
   }
 
 
