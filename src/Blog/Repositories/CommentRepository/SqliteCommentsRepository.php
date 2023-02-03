@@ -14,7 +14,7 @@ use Veliafar\PhpBlog\Blog\UUID;
 
 class SqliteCommentsRepository implements CommentRepositoryInterface
 {
-  public function __construct(private PDO $connection)
+  public function __construct(private PDO $connection, private SqlitePostsRepository $postRepository, private SqliteUsersRepository $userRepository)
   {
   }
 
@@ -55,11 +55,9 @@ class SqliteCommentsRepository implements CommentRepositoryInterface
       );
     }
 
-    $postRepository = new SqlitePostsRepository($this->connection);
-    $post = $postRepository->get(new UUID($result['post_uuid']));
 
-    $userRepository = new SqliteUsersRepository($this->connection);
-    $user = $userRepository->get(new UUID($result['author_uuid']));
+    $post = $this->postRepository->get(new UUID($result['post_uuid']));
+    $user = $this->userRepository->get(new UUID($result['author_uuid']));
 
     return new Comment(
       new UUID($result['uuid']),

@@ -14,7 +14,7 @@ use Veliafar\PhpBlog\Blog\UUID;
 
 class SqlitePostsRepository implements PostRepositoryInterface
 {
-  public function __construct(private PDO $connection)
+  public function __construct(private PDO $connection, private SqliteUsersRepository $user)
   {
   }
 
