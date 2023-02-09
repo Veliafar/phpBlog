@@ -8,6 +8,7 @@ use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Veliafar\PhpBlog\Http\Actions\Comment\CreateComment;
 use Veliafar\PhpBlog\Http\Actions\Comment\FindCommentByUuid;
 use Veliafar\PhpBlog\Http\Actions\Post\CreatePost;
+use Veliafar\PhpBlog\Http\Actions\Post\DeletePost;
 use Veliafar\PhpBlog\Http\Actions\Post\FindPostByUuid;
 use Veliafar\PhpBlog\Http\Actions\User\CreateUser;
 use Veliafar\PhpBlog\Http\Actions\User\FindByUsername;
@@ -82,6 +83,12 @@ $routes = [
       $usersRepository
     ),
   ],
+  'DELETE' =>  [
+    '/posts' => new DeletePost(
+      $postsRepository,
+      $commentsRepository
+    ),
+  ]
 ];
 
 
@@ -98,7 +105,8 @@ if (!array_key_exists($path, $routes[$method])) {
 $action = $routes[$method][$path];
 try {
   $response = $action->handle($request);
-} catch (AppException $e) {
+  $response->send();
+} catch (Exception $e) {
   (new ErrorResponse($e->getMessage()))->send();
 }
-$response->send();
+

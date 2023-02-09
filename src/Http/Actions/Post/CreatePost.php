@@ -51,7 +51,6 @@ class CreatePost implements ActionInterface
       );
     } catch (HttpException $e) {
       return new ErrorResponse($e->getMessage());
-
     }
     // Сохраняем новую статью в репозитории
     $this->postsRepository->save($post);
