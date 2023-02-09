@@ -17,9 +17,9 @@ $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 
 
 
-$postRepository = new SqlitePostsRepository($connection);
 $userRepository = new SqliteUsersRepository($connection);
-$commentRepository = new SqliteCommentsRepository($connection);
+$postRepository = new SqlitePostsRepository($connection, $userRepository);
+$commentRepository = new SqliteCommentsRepository($connection, $postRepository, $userRepository);
 $faker = Faker\Factory::create('ru_RU');
 try {
   // $command->handle(Arguments::fromArgv($argv));
