@@ -15,13 +15,14 @@ use Veliafar\PhpBlog\Http\Actions\User\FindByUsername;
 use Veliafar\PhpBlog\Http\ErrorResponse;
 use Veliafar\PhpBlog\Http\Request;
 
-require_once __DIR__ . '/vendor/autoload.php';
+$container = require __DIR__ . '/bootstrap.php';
 
 $request = new Request(
   $_GET,
   $_SERVER,
   file_get_contents('php://input'),
 );
+
 try {
   $path = $request->path();
 } catch (HttpException) {
@@ -29,12 +30,8 @@ try {
   return;
 }
 try {
-// Пытаемся получить HTTP-метод запроса
   $method = $request->method();
 } catch (HttpException) {
-// Возвращаем неудачный ответ,
-// если по какой-то причине
-// не можем получить метод
   (new ErrorResponse)->send();
   return;
 }
@@ -55,54 +52,33 @@ $commentsRepository = new SqliteCommentsRepository(
 
 
 $routes = [
-  // Добавили ещё один уровень вложенности
-  // для отделения маршрутов,
-  // применяемых к запросам с разными методами
   'GET' => [
-    '/users/show' => new FindByUsername(
-      $usersRepository
-    ),
-    '/posts/show' => new FindPostByUuid(
-      $postsRepository
-    ),
-    '/comments/show' => new FindCommentByUuid(
-      $commentsRepository
-    ),
+    '/users/show' => FindByUsername::class,
+    '/posts/show' => FindPostByUuid::class,
+    '/comments/show' => FindCommentByUuid::class,
   ],
   'POST' => [
-    '/users/create' => new CreateUser(
-      $usersRepository
-    ),
-    '/posts/create' => new CreatePost(
-      $postsRepository,
-      $usersRepository
-    ),
-    '/comments/create' => new CreateComment(
-      $commentsRepository,
-      $postsRepository,
-      $usersRepository
-    ),
+    '/users/create' => CreateUser::class,
+    '/posts/create' => CreatePost::class,
+    '/comments/create' => CreateComment::class,
   ],
-  'DELETE' =>  [
-    '/posts' => new DeletePost(
-      $postsRepository,
-      $commentsRepository
-    ),
+  'DELETE' => [
+    '/posts' => DeletePost::class,
   ]
 ];
-
 
 if (!array_key_exists($method, $routes)) {
   (new ErrorResponse('Not found'))->send();
   return;
 }
-// Ищем маршрут среди маршрутов для этого метода
 if (!array_key_exists($path, $routes[$method])) {
   (new ErrorResponse('Not found'))->send();
   return;
 }
-// Выбираем действие по методу и пути
-$action = $routes[$method][$path];
+
+$actionClassName = $routes[$method][$path];
+$action = $container->get($actionClassName);
+
 try {
   $response = $action->handle($request);
   $response->send();
