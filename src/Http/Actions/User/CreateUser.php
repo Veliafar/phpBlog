@@ -43,6 +43,7 @@ class CreateUser implements ActionInterface
       return new ErrorResponse($e->getMessage());
     }
     $this->usersRepository->save($user);
+
     return new SuccessfulResponse([
       'uuid' => (string)$newUserUuid,
     ]);

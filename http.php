@@ -2,8 +2,11 @@
 
 use Veliafar\PhpBlog\Blog\Exceptions\AppException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
+use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
 use Veliafar\PhpBlog\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\SqliteUsersRepository;
+use Veliafar\PhpBlog\Http\Actions\Comment\CreateComment;
+use Veliafar\PhpBlog\Http\Actions\Comment\FindCommentByUuid;
 use Veliafar\PhpBlog\Http\Actions\Post\CreatePost;
 use Veliafar\PhpBlog\Http\Actions\Post\FindPostByUuid;
 use Veliafar\PhpBlog\Http\Actions\User\CreateUser;
@@ -35,11 +38,17 @@ try {
   return;
 }
 
+$pdo = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 $usersRepository = new SqliteUsersRepository(
-  new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
+  $pdo
 );
 $postsRepository = new SqlitePostsRepository(
-  new PDO('sqlite:' . __DIR__ . '/blog.sqlite'),
+  $pdo,
+  $usersRepository
+);
+$commentsRepository = new SqliteCommentsRepository(
+  $pdo,
+  $postsRepository,
   $usersRepository
 );
 
@@ -55,6 +64,9 @@ $routes = [
     '/posts/show' => new FindPostByUuid(
       $postsRepository
     ),
+    '/comments/show' => new FindCommentByUuid(
+      $commentsRepository
+    ),
   ],
   'POST' => [
     '/users/create' => new CreateUser(
@@ -64,11 +76,15 @@ $routes = [
       $postsRepository,
       $usersRepository
     ),
+    '/comments/create' => new CreateComment(
+      $commentsRepository,
+      $postsRepository,
+      $usersRepository
+    ),
   ],
 ];
 
-// Если у нас нет маршрутов для метода запроса -
-// возвращаем неуспешный ответ
+
 if (!array_key_exists($method, $routes)) {
   (new ErrorResponse('Not found'))->send();
   return;
