@@ -3,6 +3,8 @@
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Http\Actions\Comment\CreateComment;
 use Veliafar\PhpBlog\Http\Actions\Comment\FindCommentByUuid;
+use Veliafar\PhpBlog\Http\Actions\Like\CreateCommentLike;
+use Veliafar\PhpBlog\Http\Actions\Like\CreatePostLike;
 use Veliafar\PhpBlog\Http\Actions\Post\CreatePost;
 use Veliafar\PhpBlog\Http\Actions\Post\DeletePost;
 use Veliafar\PhpBlog\Http\Actions\Post\FindPostByUuid;
@@ -33,6 +35,7 @@ try {
 }
 
 
+
 $routes = [
   'GET' => [
     '/users/show' => FindByUsername::class,
@@ -42,7 +45,9 @@ $routes = [
   'POST' => [
     '/users/create' => CreateUser::class,
     '/posts/create' => CreatePost::class,
+    '/posts/like/create' => CreatePostLike::class,
     '/comments/create' => CreateComment::class,
+    '/comments/like/create' => CreateCommentLike::class,
   ],
   'DELETE' => [
     '/posts' => DeletePost::class,

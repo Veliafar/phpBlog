@@ -59,7 +59,6 @@ class SqlitePostsRepository implements PostRepositoryInterface
       );
     }
 
-
     $user = $this->userRepository->get(new UUID($result['author_uuid']));
 
     return new Post(
