@@ -2,12 +2,12 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Like;
 
-use Veliafar\PhpBlog\Blog\CommentLike;
 use Veliafar\PhpBlog\Blog\Exceptions\CommentNotFoundException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\LikeAlreadyExistException;
 use Veliafar\PhpBlog\Blog\Exceptions\UserNotFoundException;
+use Veliafar\PhpBlog\Blog\Like\CommentLike;
 use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\CommentRepositoryInterface;
 use Veliafar\PhpBlog\Blog\Repositories\LikeRepository\CommentLikeRepositoryInterface;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;

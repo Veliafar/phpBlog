@@ -2,7 +2,7 @@
 
 namespace Veliafar\PhpBlog\Blog\Repositories\LikeRepository;
 
-use Veliafar\PhpBlog\Blog\CommentLike;
+use Veliafar\PhpBlog\Blog\Like\CommentLike;
 use Veliafar\PhpBlog\Blog\UUID;
 
 interface CommentLikeRepositoryInterface

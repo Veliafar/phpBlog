@@ -8,7 +8,7 @@ use Veliafar\PhpBlog\Blog\Exceptions\LikeAlreadyExistException;
 use Veliafar\PhpBlog\Blog\Exceptions\LikeNotFoundException;
 use Veliafar\PhpBlog\Blog\Exceptions\PostNotFoundException;
 use Veliafar\PhpBlog\Blog\Exceptions\UserNotFoundException;
-use Veliafar\PhpBlog\Blog\PostLike;
+use Veliafar\PhpBlog\Blog\Like\PostLike;
 use Veliafar\PhpBlog\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Veliafar\PhpBlog\Blog\UUID;
