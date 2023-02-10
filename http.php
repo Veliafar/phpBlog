@@ -1,10 +1,6 @@
 <?php
 
-use Veliafar\PhpBlog\Blog\Exceptions\AppException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
-use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
-use Veliafar\PhpBlog\Blog\Repositories\PostRepository\SqlitePostsRepository;
-use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Veliafar\PhpBlog\Http\Actions\Comment\CreateComment;
 use Veliafar\PhpBlog\Http\Actions\Comment\FindCommentByUuid;
 use Veliafar\PhpBlog\Http\Actions\Post\CreatePost;
@@ -35,20 +31,6 @@ try {
   (new ErrorResponse)->send();
   return;
 }
-
-$pdo = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
-$usersRepository = new SqliteUsersRepository(
-  $pdo
-);
-$postsRepository = new SqlitePostsRepository(
-  $pdo,
-  $usersRepository
-);
-$commentsRepository = new SqliteCommentsRepository(
-  $pdo,
-  $postsRepository,
-  $usersRepository
-);
 
 
 $routes = [

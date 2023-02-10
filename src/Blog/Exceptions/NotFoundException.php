@@ -2,7 +2,9 @@
 
 namespace Veliafar\PhpBlog\Blog\Exceptions;
 
-class NotFoundException extends AppException
+use Psr\Container\NotFoundExceptionInterface;
+
+class NotFoundException extends AppException implements NotFoundExceptionInterface
 {
 
 }

@@ -1,5 +1,6 @@
 <?php
 
+use Veliafar\PhpBlog\Blog\Container\ContainerStorage;
 use Veliafar\PhpBlog\Blog\Container\DIContainer;
 use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\CommentRepositoryInterface;
 use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
@@ -10,7 +11,7 @@ use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$container = new DIContainer();
+$container = new DIContainer(new ContainerStorage());
 
 $container->bind(
   PDO::class,
