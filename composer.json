@@ -6,6 +6,11 @@
       "Veliafar\\PhpBlog\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Veliafar\\PhpBlog\\UnitTests\\": "tests/"
+    }
+  },
   "authors": [
     {
       "name": "Veliafar",
@@ -14,8 +19,15 @@
   ],
   "require": {
     "fakerphp/faker": "^1.21",
-    "roave/security-advisories": "dev-latest",
     "ext-pdo": "*",
-    "symfony/polyfill-uuid": "^1.27"
+    "symfony/polyfill-uuid": "^1.27",
+    "ext-mbstring": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "roave/security-advisories": "dev-latest"
+  },
+  "scripts": {
+    "test": "phpunit tests --testdox --colors"
   }
 }

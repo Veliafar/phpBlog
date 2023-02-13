@@ -2,7 +2,9 @@
 
 namespace Veliafar\PhpBlog\Blog\Exceptions;
 
-class AppException extends \Exception
+use Exception;
+
+class AppException extends Exception
 {
 
 }

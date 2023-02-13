@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Blog\Exceptions;
 
-class UserNotFoundException extends AppException
+class LikeNotFoundException extends AppException
 {
+
 }

@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Blog\Exceptions;
 
-class UserNotFoundException extends AppException
+class JsonException extends AppException
 {
+
 }
