@@ -2,7 +2,6 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Comment;
 
-use Veliafar\PhpBlog\Blog\Comment;
 use Veliafar\PhpBlog\Blog\Exceptions\CommentNotFoundException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
@@ -28,20 +27,14 @@ class FindCommentByUuid implements ActionInterface
   public function handle(Request $request): Response
   {
     try {
-      // Пытаемся получить искомое имя пользователя из запроса
       $commentUUID = $request->query('commentUUID');
     } catch (HttpException $e) {
-      // Если в запросе нет параметра username -
-      // возвращаем неуспешный ответ,
-      // сообщение об ошибке берём из описания исключения
       return new ErrorResponse($e->getMessage());
     }
     try {
-      // Пытаемся найти пользователя в репозитории
       $comment = $this->commentsRepository->get(new UUID($commentUUID));
     } catch (CommentNotFoundException $e) {
-      // Если пользователь не найден -
-      // возвращаем неуспешный ответ
+
       return new ErrorResponse($e->getMessage());
     }
     // Возвращаем успешный ответ

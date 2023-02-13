@@ -6,6 +6,11 @@
       "Veliafar\\PhpBlog\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Veliafar\\PhpBlog\\UnitTests\\": "tests/"
+    }
+  },
   "authors": [
     {
       "name": "Veliafar",

@@ -59,7 +59,6 @@ class SqlitePostsRepository implements PostRepositoryInterface
       );
     }
 
-
     $user = $this->userRepository->get(new UUID($result['author_uuid']));
 
     return new Post(
@@ -74,23 +73,23 @@ class SqlitePostsRepository implements PostRepositoryInterface
    * @throws PostNotFoundException
    * @throws CommentNotFoundException
    */
-  public function delete(UUID $post_uuid, CommentRepositoryInterface $commentRepository): void
+  public function delete(UUID $uuid, CommentRepositoryInterface $commentRepository): void
   {
     $statement = $this->connection->prepare(
       'DELETE FROM posts WHERE uuid = :uuid'
     );
     $statement->execute([
-      'uuid' => (string)$post_uuid,
+      'uuid' => (string)$uuid,
     ]);
 
     $result = $statement->rowCount();
     if ($result === 0) {
       throw new PostNotFoundException(
-        "Cannot delete post: $post_uuid"
+        "Cannot delete post: $uuid"
       );
     }
 
-    $commentRepository->deleteAllCommentsOfPost($post_uuid);
+    $commentRepository->deleteAllCommentsOfPost($uuid);
   }
 
 }
