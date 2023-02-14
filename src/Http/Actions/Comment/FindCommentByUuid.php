@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Comment;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\CommentNotFoundException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
@@ -16,7 +17,8 @@ use Veliafar\PhpBlog\Http\SuccessfulResponse;
 class FindCommentByUuid implements ActionInterface
 {
   public function __construct(
-    private CommentRepositoryInterface $commentsRepository
+    private CommentRepositoryInterface $commentsRepository,
+    private LoggerInterface            $logger,
   )
   {
   }
@@ -29,17 +31,21 @@ class FindCommentByUuid implements ActionInterface
     try {
       $commentUUID = $request->query('commentUUID');
     } catch (HttpException $e) {
+      $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
     try {
       $comment = $this->commentsRepository->get(new UUID($commentUUID));
     } catch (CommentNotFoundException $e) {
-
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
-    // Возвращаем успешный ответ
+
+    $commentUUID = (string)$comment->uuid();
+    $this->logger->info("Comment found: $commentUUID");
+
     return new SuccessfulResponse([
-      'commentUUID' => (string)$comment->uuid(),
+      'commentUUID' => $commentUUID,
 
       'postUUID' => (string)$comment->getPost()->uuid(),
       'postUserUUID' => (string)$comment->getPost()->getUser()->uuid(),

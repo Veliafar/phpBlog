@@ -2,14 +2,14 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Post;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
-use Veliafar\PhpBlog\Blog\Exceptions\UserNotFoundException;
 use Veliafar\PhpBlog\Blog\Post;
 use Veliafar\PhpBlog\Blog\Repositories\PostRepository\PostRepositoryInterface;
-use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
 use Veliafar\PhpBlog\Blog\UUID;
 use Veliafar\PhpBlog\Http\Actions\ActionInterface;
+use Veliafar\PhpBlog\Http\Auth\IdentificationUsernameInterface;
 use Veliafar\PhpBlog\Http\ErrorResponse;
 use Veliafar\PhpBlog\Http\Request;
 use Veliafar\PhpBlog\Http\Response;
@@ -19,7 +19,8 @@ class CreatePost implements ActionInterface
 {
   public function __construct(
     private PostRepositoryInterface $postsRepository,
-    private UserRepositoryInterface $usersRepository
+    private IdentificationUsernameInterface $identification,
+    private LoggerInterface $logger,
   )
   {
   }
@@ -29,20 +30,12 @@ class CreatePost implements ActionInterface
    */
   public function handle(Request $request): Response
   {
-    try {
-      $authorUuid = new UUID($request->jsonBodyField('author_uuid'));
-    } catch (HttpException|InvalidArgumentException $e) {
-      return new ErrorResponse($e->getMessage());
-    }
-    try {
-      $user = $this->usersRepository->get($authorUuid);
-    } catch (UserNotFoundException $e) {
-      return new ErrorResponse($e->getMessage());
-    }
+
+    $user = $this->identification->user($request, false);
+
     try {
       $newPostUuid = UUID::random();
-      // Пытаемся создать объект статьи
-      // из данных запроса
+
       $post = new Post(
         $newPostUuid,
         $user,
@@ -50,12 +43,13 @@ class CreatePost implements ActionInterface
         $request->jsonBodyField('text'),
       );
     } catch (HttpException $e) {
+      $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
-    // Сохраняем новую статью в репозитории
+
     $this->postsRepository->save($post);
-    // Возвращаем успешный ответ,
-    // содержащий UUID новой статьи
+    $this->logger->info("Post created: $newPostUuid");
+
     return new SuccessfulResponse([
       'uuid' => (string)$newPostUuid,
     ]);

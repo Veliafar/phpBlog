@@ -5,20 +5,22 @@ namespace Veliafar\PhpBlog\Blog\Commands;
 use PHPUnit\Framework\TestCase;
 use Veliafar\PhpBlog\Blog\Exceptions\ArgumentsException;
 use Veliafar\PhpBlog\Blog\Exceptions\CommandException;
+use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\UserNotFoundException;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\DummyUsersRepository;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
 use Veliafar\PhpBlog\Blog\User;
 use Veliafar\PhpBlog\Blog\UUID;
+use Veliafar\PhpBlog\UnitTests\Blog\DummyLogger;
 
 class CreateUserCommandTest extends TestCase
 {
   public function testItThrowAnExceptionWhenUserAlreadyExists(): void
   {
-    $command = new CreateUserCommand(new DummyUsersRepository());
+    $command = new CreateUserCommand(new DummyUsersRepository(), new DummyLogger());
     $this->expectException(CommandException::class);
-    $this->expectExceptionMessage("User already exists: Ivan");
-    $command->handle(new Arguments(['username' => 'Ivan']));
+    $this->expectExceptionMessage("User already exists: user123");
+    $command->handle(new Arguments(['username' => 'user123']));
   }
 
   private function makeUsersRepository(): UserRepositoryInterface
@@ -41,27 +43,36 @@ class CreateUserCommandTest extends TestCase
     };
   }
 
+  /**
+   * @throws CommandException
+   * @throws InvalidArgumentException
+   */
   public function testItRequiresFirstName(): void
   {
     $usersRepository = $this->makeUsersRepository();
-    $command = new CreateUserCommand($usersRepository);
+    $command = new CreateUserCommand(new DummyUsersRepository(), new DummyLogger());
     $this->expectException(ArgumentsException::class);
     $this->expectExceptionMessage("No such argument: first_name");
-    $command->handle(new Arguments(['username' => 'Ivan']));
+    $command->handle(new Arguments(['username' => 'IvanTest']));
   }
 
   public function testItRequiresLastName(): void
   {
     $usersRepository = $this->makeUsersRepository();
-    $command = new CreateUserCommand($usersRepository);
+    $command = new CreateUserCommand(new DummyUsersRepository(), new DummyLogger());
     $this->expectException(ArgumentsException::class);
     $this->expectExceptionMessage("No such argument: last_name");
     $command->handle(new Arguments([
-      'username' => 'Ivan',
-      'first_name' => 'Ivan'
+      'username' => 'IvanTest',
+      'first_name' => 'IvanTest'
     ]));
   }
 
+  /**
+   * @throws CommandException
+   * @throws InvalidArgumentException
+   * @throws ArgumentsException
+   */
   public function testItSavesUserRepository(): void
   {
     $usersRepository = new class implements UserRepositoryInterface {
@@ -88,10 +99,10 @@ class CreateUserCommandTest extends TestCase
         return $this->called;
       }
     };
-    $command = new CreateUserCommand($usersRepository);
+    $command = new CreateUserCommand($usersRepository, new DummyLogger());
     $command->handle(new Arguments([
-      'username' => 'Ivan',
-      'first_name' => 'Ivan',
+      'username' => 'IvanTest',
+      'first_name' => 'IvanTest',
       'last_name' => 'Nikitin'
     ]));
     $this->assertTrue($usersRepository->wasCalled());
