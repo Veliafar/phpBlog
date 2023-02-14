@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Like;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\LikeNotFoundException;
@@ -16,7 +17,8 @@ use Veliafar\PhpBlog\Http\SuccessfulResponse;
 class FindPostLikeByPostUuid implements ActionInterface
 {
   public function __construct(
-    private PostLikeRepositoryInterface $likeRepository
+    private PostLikeRepositoryInterface $likeRepository,
+    private LoggerInterface             $logger,
   )
   {
   }
@@ -29,14 +31,18 @@ class FindPostLikeByPostUuid implements ActionInterface
     try {
       $postUUID = $request->query('postUUID');
     } catch (HttpException $e) {
+      $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
     try {
       $like = $this->likeRepository->getByPostUUID(new UUID($postUUID));
     } catch (LikeNotFoundException $e) {
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
+
     // Возвращаем успешный ответ
+    $this->logger->info("Post Likes found");
     return new SuccessfulResponse([
 //      'likeUUID' => (string)$like->uuid(),
 //

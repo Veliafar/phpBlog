@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\User;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\UserNotFoundException;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
@@ -14,7 +15,8 @@ use Veliafar\PhpBlog\Http\SuccessfulResponse;
 class FindByUsername implements ActionInterface
 {
   public function __construct(
-    private UserRepositoryInterface $usersRepository
+    private UserRepositoryInterface $usersRepository,
+    private LoggerInterface $logger,
   )
   {
   }
@@ -23,23 +25,18 @@ class FindByUsername implements ActionInterface
   public function handle(Request $request): Response
   {
     try {
-      // Пытаемся получить искомое имя пользователя из запроса
       $username = $request->query('username');
     } catch (HttpException $e) {
-      // Если в запросе нет параметра username -
-      // возвращаем неуспешный ответ,
-      // сообщение об ошибке берём из описания исключения
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
     try {
-      // Пытаемся найти пользователя в репозитории
       $user = $this->usersRepository->getByUsername($username);
     } catch (UserNotFoundException $e) {
-      // Если пользователь не найден -
-      // возвращаем неуспешный ответ
+      $this->logger->notice($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
-    // Возвращаем успешный ответ
+    $this->logger->info("User found: $username");
     return new SuccessfulResponse([
       'username' => $user->username(),
       'name' => $user->name()->first() . ' ' . $user->name()->last(),

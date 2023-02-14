@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Post;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\UserNotFoundException;
@@ -19,7 +20,8 @@ class CreatePost implements ActionInterface
 {
   public function __construct(
     private PostRepositoryInterface $postsRepository,
-    private UserRepositoryInterface $usersRepository
+    private UserRepositoryInterface $usersRepository,
+    private LoggerInterface $logger,
   )
   {
   }
@@ -41,8 +43,7 @@ class CreatePost implements ActionInterface
     }
     try {
       $newPostUuid = UUID::random();
-      // Пытаемся создать объект статьи
-      // из данных запроса
+
       $post = new Post(
         $newPostUuid,
         $user,
@@ -50,12 +51,13 @@ class CreatePost implements ActionInterface
         $request->jsonBodyField('text'),
       );
     } catch (HttpException $e) {
+      $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
-    // Сохраняем новую статью в репозитории
+
     $this->postsRepository->save($post);
-    // Возвращаем успешный ответ,
-    // содержащий UUID новой статьи
+    $this->logger->info("Post created: $newPostUuid");
+
     return new SuccessfulResponse([
       'uuid' => (string)$newPostUuid,
     ]);

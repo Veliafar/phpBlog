@@ -1,4 +1,5 @@
 .idea/
 /vendor/
 .phpunit.result.cache
-*blog.sqlite
+blog.sqlite
+logs/

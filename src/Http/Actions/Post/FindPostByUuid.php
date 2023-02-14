@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Post;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\PostNotFoundException;
@@ -16,7 +17,8 @@ use Veliafar\PhpBlog\Http\SuccessfulResponse;
 class FindPostByUuid implements ActionInterface
 {
   public function __construct(
-    private PostRepositoryInterface $postRepository
+    private PostRepositoryInterface $postRepository,
+    private LoggerInterface         $logger,
   )
   {
   }
@@ -27,23 +29,18 @@ class FindPostByUuid implements ActionInterface
   public function handle(Request $request): Response
   {
     try {
-      // Пытаемся получить искомое имя пользователя из запроса
       $postUUID = $request->query('postUUID');
     } catch (HttpException $e) {
-      // Если в запросе нет параметра username -
-      // возвращаем неуспешный ответ,
-      // сообщение об ошибке берём из описания исключения
+      $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
     try {
-      // Пытаемся найти пользователя в репозитории
       $post = $this->postRepository->get(new UUID($postUUID));
     } catch (PostNotFoundException $e) {
-      // Если пользователь не найден -
-      // возвращаем неуспешный ответ
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
-    // Возвращаем успешный ответ
+    $this->logger->info("Post found: $postUUID");
     return new SuccessfulResponse([
       'postUUID' => (string)$post->uuid(),
       'userUUID' => (string)$post->getUserUUID(),
