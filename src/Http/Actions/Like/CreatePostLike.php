@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\Like;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\LikeAlreadyExistException;
@@ -22,8 +23,9 @@ class CreatePostLike implements ActionInterface
 {
   public function __construct(
     private PostLikeRepositoryInterface $likeRepository,
-    private PostRepositoryInterface $postsRepository,
-    private UserRepositoryInterface $usersRepository
+    private PostRepositoryInterface     $postsRepository,
+    private UserRepositoryInterface     $usersRepository,
+    private LoggerInterface             $logger,
   )
   {
   }
@@ -38,18 +40,21 @@ class CreatePostLike implements ActionInterface
       $userUuid = new UUID($request->jsonBodyField('user_uuid'));
       $postUuid = new UUID($request->jsonBodyField('post_uuid'));
     } catch (HttpException|InvalidArgumentException $e) {
+      $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
 
     try {
       $this->likeRepository->checkUserLikeForPostExist($postUuid, $userUuid);
     } catch (LikeAlreadyExistException $e) {
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
 
     try {
       $user = $this->usersRepository->get($userUuid);
     } catch (UserNotFoundException $e) {
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
 
@@ -57,6 +62,7 @@ class CreatePostLike implements ActionInterface
     try {
       $post = $this->postsRepository->get($postUuid);
     } catch (PostNotFoundException $e) {
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
 
@@ -68,9 +74,11 @@ class CreatePostLike implements ActionInterface
         $user
       );
     } catch (HttpException $e) {
+      $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
     $this->likeRepository->save($like);
+    $this->logger->info("Post Like created: $newLikeUuid");
     return new SuccessfulResponse([
       'uuid' => (string)$newLikeUuid,
     ]);

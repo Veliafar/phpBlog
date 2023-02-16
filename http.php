@@ -1,5 +1,6 @@
 <?php
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Http\Actions\Comment\CreateComment;
 use Veliafar\PhpBlog\Http\Actions\Comment\FindCommentByUuid;
@@ -15,6 +16,8 @@ use Veliafar\PhpBlog\Http\Request;
 
 $container = require __DIR__ . '/bootstrap.php';
 
+$logger = $container->get(LoggerInterface::class);
+
 $request = new Request(
   $_GET,
   $_SERVER,
@@ -23,17 +26,18 @@ $request = new Request(
 
 try {
   $path = $request->path();
-} catch (HttpException) {
+} catch (HttpException $except) {
+  $logger->warning($except->getMessage());
   (new ErrorResponse)->send();
   return;
 }
 try {
   $method = $request->method();
-} catch (HttpException) {
+} catch (HttpException $except) {
+  $logger->warning($except->getMessage());
   (new ErrorResponse)->send();
   return;
 }
-
 
 
 $routes = [
@@ -54,12 +58,13 @@ $routes = [
   ]
 ];
 
-if (!array_key_exists($method, $routes)) {
-  (new ErrorResponse('Not found'))->send();
-  return;
-}
-if (!array_key_exists($path, $routes[$method])) {
-  (new ErrorResponse('Not found'))->send();
+if (
+  !array_key_exists($method, $routes)
+  || !array_key_exists($path, $routes[$method])
+) {
+  $message = "Route not found: $method $path";
+  $logger->notice($message);
+  (new ErrorResponse($message))->send();
   return;
 }
 
@@ -69,7 +74,12 @@ $action = $container->get($actionClassName);
 try {
   $response = $action->handle($request);
   $response->send();
-} catch (Exception $e) {
-  (new ErrorResponse($e->getMessage()))->send();
+} catch (Exception $exception) {
+  $logger->error($exception->getMessage(), ['exception' => $exception]);
+  try {
+    (new ErrorResponse($exception->getMessage()))->send();
+  } catch (JsonException $except) {
+    $logger->error($except->getMessage(), ['except' => $except]);
+  }
 }
 

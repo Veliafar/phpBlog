@@ -2,6 +2,7 @@
 
 namespace Veliafar\PhpBlog\Http\Actions\User;
 
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Name;
@@ -17,7 +18,8 @@ use Veliafar\PhpBlog\Http\SuccessfulResponse;
 class CreateUser implements ActionInterface
 {
   public function __construct(
-    private UserRepositoryInterface $usersRepository
+    private UserRepositoryInterface $usersRepository,
+    private LoggerInterface         $logger,
   )
   {
   }
@@ -40,10 +42,11 @@ class CreateUser implements ActionInterface
       );
 
     } catch (HttpException $e) {
+      $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
     $this->usersRepository->save($user);
-
+    $this->logger->info("User created: $newUserUuid");
     return new SuccessfulResponse([
       'uuid' => (string)$newUserUuid,
     ]);
