@@ -7,6 +7,8 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Container\ContainerStorage;
 use Veliafar\PhpBlog\Blog\Container\DIContainer;
+use Veliafar\PhpBlog\Blog\Repositories\AuthTokensRepository\AuthTokensRepositoryInterface;
+use Veliafar\PhpBlog\Blog\Repositories\AuthTokensRepository\SqliteAuthTokensRepository;
 use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\CommentRepositoryInterface;
 use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\SqliteCommentsRepository;
 use Veliafar\PhpBlog\Blog\Repositories\LikeRepository\CommentLikeRepositoryInterface;
@@ -17,10 +19,12 @@ use Veliafar\PhpBlog\Blog\Repositories\PostRepository\PostRepositoryInterface;
 use Veliafar\PhpBlog\Blog\Repositories\PostRepository\SqlitePostsRepository;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
-use Veliafar\PhpBlog\Http\Auth\IdentificationUsernameInterface;
-use Veliafar\PhpBlog\Http\Auth\IdentificationUUIDInterface;
-use Veliafar\PhpBlog\Http\Auth\JsonBodyUsernameIdentification;
-use Veliafar\PhpBlog\Http\Auth\JsonBodyUUIDIdentification;
+use Veliafar\PhpBlog\Http\Auth\AuthenticationUUIDInterface;
+use Veliafar\PhpBlog\Http\Auth\BearerTokenAuthentication;
+use Veliafar\PhpBlog\Http\Auth\JsonBodyUUIDAuthentication;
+use Veliafar\PhpBlog\Http\Auth\PasswordAuthentication;
+use Veliafar\PhpBlog\Http\Auth\PasswordAuthenticationInterface;
+use Veliafar\PhpBlog\Http\Auth\TokenAuthenticationInterface;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -74,13 +78,21 @@ $container->bind(
 );
 
 $container->bind(
-  IdentificationUsernameInterface::class,
-  JsonBodyUsernameIdentification::class
+  PasswordAuthenticationInterface::class,
+  PasswordAuthentication::class
+);
+$container->bind(
+  TokenAuthenticationInterface::class,
+  BearerTokenAuthentication::class
+);
+$container->bind(
+  AuthTokensRepositoryInterface::class,
+  SqliteAuthTokensRepository::class
 );
 
 $container->bind(
-  IdentificationUUIDInterface::class,
-  JsonBodyUUIDIdentification::class
+  AuthenticationUUIDInterface::class,
+  JsonBodyUUIDAuthentication::class
 );
 
 $container->bind(

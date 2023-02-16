@@ -4,6 +4,7 @@ namespace Veliafar\PhpBlog\Blog\Repositories\UsersRepository;
 
 use \PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\UserNotFoundException;
 use Veliafar\PhpBlog\Blog\Name;
@@ -12,14 +13,16 @@ use Veliafar\PhpBlog\Blog\UUID;
 
 class SqliteUsersRepository implements UserRepositoryInterface
 {
-  public function __construct(private PDO $connection)
+  public function __construct(
+    private PDO $connection,
+  )
   {
   }
 
   public function save(User $user): void
   {
     $statement = $this->connection->prepare(
-      'INSERT INTO users (uuid, first_name, last_name, username) VALUES (:uuid, :first_name, :last_name, :username)'
+      'INSERT INTO users (uuid, first_name, last_name, username, password) VALUES (:uuid, :first_name, :last_name, :username, :password)'
     );
 
     $statement->execute([
@@ -27,6 +30,7 @@ class SqliteUsersRepository implements UserRepositoryInterface
       ':first_name' => $user->name()->first(),
       ':last_name' => $user->name()->last(),
       ':username' => $user->username(),
+      ':password' => $user->password(),
     ]);
   }
 
@@ -79,6 +83,7 @@ class SqliteUsersRepository implements UserRepositoryInterface
       new UUID($result['uuid']),
       new Name($result['first_name'], $result['last_name']),
       $result['username'],
+      $result['password']
     );
   }
 }

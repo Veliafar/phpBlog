@@ -12,7 +12,7 @@ use Veliafar\PhpBlog\Blog\User;
 use Veliafar\PhpBlog\Blog\UUID;
 use Veliafar\PhpBlog\Http\Request;
 
-class JsonBodyUUIDIdentification implements IdentificationUUIDInterface
+class JsonBodyUUIDAuthentication implements AuthenticationUUIDInterface
 {
 
   public function __construct(

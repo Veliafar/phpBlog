@@ -3,13 +3,15 @@
 namespace Veliafar\PhpBlog\Http\Actions\Post;
 
 use Psr\Log\LoggerInterface;
+use Veliafar\PhpBlog\Blog\Exceptions\AppException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Post;
 use Veliafar\PhpBlog\Blog\Repositories\PostRepository\PostRepositoryInterface;
 use Veliafar\PhpBlog\Blog\UUID;
 use Veliafar\PhpBlog\Http\Actions\ActionInterface;
-use Veliafar\PhpBlog\Http\Auth\IdentificationUsernameInterface;
+use Veliafar\PhpBlog\Http\Auth\AuthenticationUsernameInterface;
+use Veliafar\PhpBlog\Http\Auth\TokenAuthenticationInterface;
 use Veliafar\PhpBlog\Http\ErrorResponse;
 use Veliafar\PhpBlog\Http\Request;
 use Veliafar\PhpBlog\Http\Response;
@@ -18,9 +20,9 @@ use Veliafar\PhpBlog\Http\SuccessfulResponse;
 class CreatePost implements ActionInterface
 {
   public function __construct(
-    private PostRepositoryInterface $postsRepository,
-    private IdentificationUsernameInterface $identification,
-    private LoggerInterface $logger,
+    private PostRepositoryInterface      $postsRepository,
+    private TokenAuthenticationInterface $identification,
+    private LoggerInterface              $logger,
   )
   {
   }
@@ -30,8 +32,12 @@ class CreatePost implements ActionInterface
    */
   public function handle(Request $request): Response
   {
-
-    $user = $this->identification->user($request, false);
+    try {
+      $user = $this->identification->user($request);
+    } catch (AppException $e) {
+      $this->logger->warning($e->getMessage());
+      return new ErrorResponse($e->getMessage());
+    }
 
     try {
       $newPostUuid = UUID::random();

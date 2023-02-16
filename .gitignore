@@ -1,5 +1,10 @@
+**/.idea/
 .idea/
-/vendor/
+**/vendor/
+vendor/
+**/.phpunit.result.cache
 .phpunit.result.cache
+**/blog.sqlite
 blog.sqlite
+**/logs/
 logs/

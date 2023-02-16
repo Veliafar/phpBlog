@@ -11,6 +11,8 @@ use Veliafar\PhpBlog\Http\Actions\Post\DeletePost;
 use Veliafar\PhpBlog\Http\Actions\Post\FindPostByUuid;
 use Veliafar\PhpBlog\Http\Actions\User\CreateUser;
 use Veliafar\PhpBlog\Http\Actions\User\FindByUsername;
+use Veliafar\PhpBlog\Http\Auth\LogIn;
+use Veliafar\PhpBlog\Http\Auth\LogOut;
 use Veliafar\PhpBlog\Http\ErrorResponse;
 use Veliafar\PhpBlog\Http\Request;
 
@@ -47,6 +49,8 @@ $routes = [
     '/comments/show' => FindCommentByUuid::class,
   ],
   'POST' => [
+    '/login' => LogIn::class,
+    '/logout' => LogOut::class,
     '/users/create' => CreateUser::class,
     '/posts/create' => CreatePost::class,
     '/posts/like/create' => CreatePostLike::class,

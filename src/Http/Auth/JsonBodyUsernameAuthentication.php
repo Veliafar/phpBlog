@@ -10,7 +10,7 @@ use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
 use Veliafar\PhpBlog\Blog\User;
 use Veliafar\PhpBlog\Http\Request;
 
-class JsonBodyUsernameIdentification implements IdentificationUsernameInterface
+class JsonBodyUsernameAuthentication implements AuthenticationUsernameInterface
 {
 
   public function __construct(
@@ -23,12 +23,10 @@ class JsonBodyUsernameIdentification implements IdentificationUsernameInterface
   /**
    * @throws AuthException
    */
-  public function user(Request $request, bool $isQuery): User
+  public function user(Request $request): User
   {
     try {
-      $username = !$isQuery
-        ? $request->jsonBodyField('username')
-        : $request->query('username');
+      $username = $request->jsonBodyField('username');
 
     } catch (HttpException $e) {
       $this->logger->warning($e->getMessage());
