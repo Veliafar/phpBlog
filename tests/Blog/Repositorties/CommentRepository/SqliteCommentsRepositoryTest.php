@@ -56,6 +56,7 @@ class SqliteCommentsRepositoryTest extends TestCase
       new UUID('123e4567-e89b-12d3-a456-426614174000'),
       new Name('First', 'Second'),
       'ivan123',
+      'password'
     );
     $post = new Post(
       new UUID('123e4567-e89b-12d3-a456-426614174000'),
@@ -92,6 +93,7 @@ class SqliteCommentsRepositoryTest extends TestCase
       'username' => 'ivan123',
       'first_name' => 'Ivan',
       'last_name' => 'Nikitin',
+      'password' => 'password'
     ]);
 
     $usersRepository = new SqliteUsersRepository($connectionStub);

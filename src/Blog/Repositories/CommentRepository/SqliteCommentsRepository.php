@@ -119,7 +119,7 @@ class SqliteCommentsRepository implements CommentRepositoryInterface
     $statement->execute([
       'post_uuid' => (string)$post_uuid,
     ]);
-    $result =  $statement->rowCount();
+    $result = $statement->rowCount();
     if ($result === 0) {
       throw new CommentNotFoundException(
         "Cannot delete comment: $post_uuid"

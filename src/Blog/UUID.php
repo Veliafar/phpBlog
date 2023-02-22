@@ -9,7 +9,7 @@ class UUID
   /**
    * @throws InvalidArgumentException
    */
-  public function __construct(private string $uuidString)
+  public function __construct(private readonly string $uuidString)
   {
     if (!uuid_is_valid($uuidString)) {
       throw new InvalidArgumentException(

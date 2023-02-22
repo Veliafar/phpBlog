@@ -33,7 +33,7 @@ class DummyUsersRepository implements UserRepositoryInterface
       );
     }
 
-    return new User(UUID::random(), new Name("first", "second"), "user123");
+    return new User(UUID::random(), new Name("first", "second"), "user123", 'password');
   }
 
 }
