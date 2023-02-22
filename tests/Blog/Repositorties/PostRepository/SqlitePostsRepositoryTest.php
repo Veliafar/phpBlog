@@ -44,16 +44,16 @@ class SqlitePostsRepositoryTest extends TestCase
         ':title' => 'Ivan',
         ':text' => 'Nikitin',
       ]);
-    // 3. При вызове метода prepare стаб подключения
-    // возвращает мок запроса
+
     $connectionStub->method('prepare')->willReturn($statementMock);
-    // 1. Передаём в репозиторий стаб подключения
+
     $repository = new SqlitePostsRepository($connectionStub, $usersRepositoryStub);
-    // Вызываем метод сохранения пользователя
+
     $user = new User(
       new UUID('123e4567-e89b-12d3-a456-426614174000'),
       new Name('First', 'Second'),
       'ivan123',
+      'password'
     );
     $post = new Post(
       new UUID('123e4567-e89b-12d3-a456-426614174000'),
@@ -83,6 +83,8 @@ class SqlitePostsRepositoryTest extends TestCase
       'username' => 'ivan123',
       'first_name' => 'Ivan',
       'last_name' => 'Nikitin',
+      'password' => 'password'
+
     ]);
 
     $usersRepository = new SqliteUsersRepository($connectionStub);

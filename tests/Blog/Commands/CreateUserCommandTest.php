@@ -20,7 +20,12 @@ class CreateUserCommandTest extends TestCase
     $command = new CreateUserCommand(new DummyUsersRepository(), new DummyLogger());
     $this->expectException(CommandException::class);
     $this->expectExceptionMessage("User already exists: user123");
-    $command->handle(new Arguments(['username' => 'user123']));
+    $command->handle(new Arguments(
+      [
+        'username' => 'user123',
+        'password' => 'password'
+      ]
+    ));
   }
 
   private function makeUsersRepository(): UserRepositoryInterface
@@ -53,7 +58,13 @@ class CreateUserCommandTest extends TestCase
     $command = new CreateUserCommand(new DummyUsersRepository(), new DummyLogger());
     $this->expectException(ArgumentsException::class);
     $this->expectExceptionMessage("No such argument: first_name");
-    $command->handle(new Arguments(['username' => 'IvanTest']));
+    $command->handle(new Arguments(
+      [
+        'username' => 'IvanTest',
+        'last_name' => 'last_name',
+        'password' => 'password'
+      ]
+    ));
   }
 
   public function testItRequiresLastName(): void
@@ -64,10 +75,23 @@ class CreateUserCommandTest extends TestCase
     $this->expectExceptionMessage("No such argument: last_name");
     $command->handle(new Arguments([
       'username' => 'IvanTest',
-      'first_name' => 'IvanTest'
+      'first_name' => 'IvanTest',
+      'password' => 'password'
     ]));
   }
 
+  public function testItRequiresPassword(): void
+  {
+    $usersRepository = $this->makeUsersRepository();
+    $command = new CreateUserCommand(new DummyUsersRepository(), new DummyLogger());
+    $this->expectException(ArgumentsException::class);
+    $this->expectExceptionMessage("No such argument: password");
+    $command->handle(new Arguments([
+      'username' => 'IvanTest',
+      'first_name' => 'IvanTest',
+      'last_name' => 'last_name',
+    ]));
+  }
   /**
    * @throws CommandException
    * @throws InvalidArgumentException
@@ -103,7 +127,8 @@ class CreateUserCommandTest extends TestCase
     $command->handle(new Arguments([
       'username' => 'IvanTest',
       'first_name' => 'IvanTest',
-      'last_name' => 'Nikitin'
+      'last_name' => 'Nikitin',
+      'password' => 'password'
     ]));
     $this->assertTrue($usersRepository->wasCalled());
   }

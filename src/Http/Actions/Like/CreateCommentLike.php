@@ -3,6 +3,7 @@
 namespace Veliafar\PhpBlog\Http\Actions\Like;
 
 use Psr\Log\LoggerInterface;
+use Veliafar\PhpBlog\Blog\Exceptions\AppException;
 use Veliafar\PhpBlog\Blog\Exceptions\CommentNotFoundException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
@@ -14,6 +15,9 @@ use Veliafar\PhpBlog\Blog\Repositories\LikeRepository\CommentLikeRepositoryInter
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
 use Veliafar\PhpBlog\Blog\UUID;
 use Veliafar\PhpBlog\Http\Actions\ActionInterface;
+use Veliafar\PhpBlog\Http\Auth\AuthenticationUsernameInterface;
+use Veliafar\PhpBlog\Http\Auth\AuthenticationUUIDInterface;
+use Veliafar\PhpBlog\Http\Auth\TokenAuthenticationInterface;
 use Veliafar\PhpBlog\Http\ErrorResponse;
 use Veliafar\PhpBlog\Http\Request;
 use Veliafar\PhpBlog\Http\Response;
@@ -23,9 +27,9 @@ class CreateCommentLike implements ActionInterface
 {
   public function __construct(
     private CommentLikeRepositoryInterface $likeRepository,
-    private CommentRepositoryInterface $commentRepository,
-    private UserRepositoryInterface $usersRepository,
-    private LoggerInterface         $logger,
+    private CommentRepositoryInterface     $commentRepository,
+    private TokenAuthenticationInterface   $identification,
+    private LoggerInterface                $logger,
   )
   {
   }
@@ -35,30 +39,26 @@ class CreateCommentLike implements ActionInterface
    */
   public function handle(Request $request): Response
   {
+    try {
+      $user = $this->identification->user($request);
+    } catch (AppException $e) {
+      $this->logger->warning($e->getMessage());
+      return new ErrorResponse($e->getMessage());
+    }
 
     try {
       $commentUuid = new UUID($request->jsonBodyField('comment_uuid'));
-      $userUuid = new UUID($request->jsonBodyField('user_uuid'));
     } catch (HttpException|InvalidArgumentException $e) {
       $this->logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
 
     try {
-      $this->likeRepository->checkUserLikeForCommentExist($commentUuid, $userUuid);
+      $this->likeRepository->checkUserLikeForCommentExist($commentUuid, $user->uuid());
     } catch (LikeAlreadyExistException $e) {
       $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
-
-
-    try {
-      $user = $this->usersRepository->get($userUuid);
-    } catch (UserNotFoundException $e) {
-      $this->logger->error($e->getMessage());
-      return new ErrorResponse($e->getMessage());
-    }
-
 
     try {
       $comment = $this->commentRepository->get($commentUuid);

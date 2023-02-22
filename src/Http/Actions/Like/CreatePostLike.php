@@ -3,6 +3,7 @@
 namespace Veliafar\PhpBlog\Http\Actions\Like;
 
 use Psr\Log\LoggerInterface;
+use Veliafar\PhpBlog\Blog\Exceptions\AppException;
 use Veliafar\PhpBlog\Blog\Exceptions\HttpException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
 use Veliafar\PhpBlog\Blog\Exceptions\LikeAlreadyExistException;
@@ -14,6 +15,9 @@ use Veliafar\PhpBlog\Blog\Repositories\PostRepository\PostRepositoryInterface;
 use Veliafar\PhpBlog\Blog\Repositories\UsersRepository\UserRepositoryInterface;
 use Veliafar\PhpBlog\Blog\UUID;
 use Veliafar\PhpBlog\Http\Actions\ActionInterface;
+use Veliafar\PhpBlog\Http\Auth\AuthenticationUsernameInterface;
+use Veliafar\PhpBlog\Http\Auth\AuthenticationUUIDInterface;
+use Veliafar\PhpBlog\Http\Auth\TokenAuthenticationInterface;
 use Veliafar\PhpBlog\Http\ErrorResponse;
 use Veliafar\PhpBlog\Http\Request;
 use Veliafar\PhpBlog\Http\Response;
@@ -24,7 +28,7 @@ class CreatePostLike implements ActionInterface
   public function __construct(
     private PostLikeRepositoryInterface $likeRepository,
     private PostRepositoryInterface     $postsRepository,
-    private UserRepositoryInterface     $usersRepository,
+    private TokenAuthenticationInterface $identification,
     private LoggerInterface             $logger,
   )
   {
@@ -35,9 +39,14 @@ class CreatePostLike implements ActionInterface
    */
   public function handle(Request $request): Response
   {
+    try {
+      $user = $this->identification->user($request);
+    } catch (AppException $e) {
+      $this->logger->warning($e->getMessage());
+      return new ErrorResponse($e->getMessage());
+    }
 
     try {
-      $userUuid = new UUID($request->jsonBodyField('user_uuid'));
       $postUuid = new UUID($request->jsonBodyField('post_uuid'));
     } catch (HttpException|InvalidArgumentException $e) {
       $this->logger->warning($e->getMessage());
@@ -45,19 +54,11 @@ class CreatePostLike implements ActionInterface
     }
 
     try {
-      $this->likeRepository->checkUserLikeForPostExist($postUuid, $userUuid);
+      $this->likeRepository->checkUserLikeForPostExist($postUuid, $user->uuid());
     } catch (LikeAlreadyExistException $e) {
       $this->logger->error($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
-
-    try {
-      $user = $this->usersRepository->get($userUuid);
-    } catch (UserNotFoundException $e) {
-      $this->logger->error($e->getMessage());
-      return new ErrorResponse($e->getMessage());
-    }
-
 
     try {
       $post = $this->postsRepository->get($postUuid);
