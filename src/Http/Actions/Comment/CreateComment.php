@@ -12,8 +12,6 @@ use Veliafar\PhpBlog\Blog\Repositories\CommentRepository\CommentRepositoryInterf
 use Veliafar\PhpBlog\Blog\Repositories\PostRepository\PostRepositoryInterface;
 use Veliafar\PhpBlog\Blog\UUID;
 use Veliafar\PhpBlog\Http\Actions\ActionInterface;
-use Veliafar\PhpBlog\Http\Auth\AuthenticationUsernameInterface;
-use Veliafar\PhpBlog\Http\Auth\AuthenticationUUIDInterface;
 use Veliafar\PhpBlog\Http\Auth\TokenAuthenticationInterface;
 use Veliafar\PhpBlog\Http\ErrorResponse;
 use Veliafar\PhpBlog\Http\Request;

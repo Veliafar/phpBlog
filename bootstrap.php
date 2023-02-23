@@ -25,14 +25,30 @@ use Veliafar\PhpBlog\Http\Auth\JsonBodyUUIDAuthentication;
 use Veliafar\PhpBlog\Http\Auth\PasswordAuthentication;
 use Veliafar\PhpBlog\Http\Auth\PasswordAuthenticationInterface;
 use Veliafar\PhpBlog\Http\Auth\TokenAuthenticationInterface;
+use Faker\Provider\Lorem;
+use Faker\Provider\ru_RU\Internet;
+use Faker\Provider\ru_RU\Person;
+use Faker\Provider\ru_RU\Text;
 
 require_once __DIR__ . '/vendor/autoload.php';
+
+$faker = new \Faker\Generator();
+$faker->addProvider(new Person($faker));
+$faker->addProvider(new Text($faker));
+$faker->addProvider(new Internet($faker));
+$faker->addProvider(new Lorem($faker));
+
 
 $container = new DIContainer(new ContainerStorage());
 Dotenv::createImmutable(__DIR__)->safeLoad();
 $container->bind(
   PDO::class,
   new PDO('sqlite:' . __DIR__ . '/' . $_ENV['SQLITE_DB_PATH'])
+);
+
+$container->bind(
+  \Faker\Generator::class,
+  $faker
 );
 
 

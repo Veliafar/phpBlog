@@ -3,6 +3,10 @@
 namespace Veliafar\PhpBlog\Blog\Commands;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use Symfony\Component\Console\Exception\ExceptionInterface;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Veliafar\PhpBlog\Blog\Exceptions\ArgumentsException;
 use Veliafar\PhpBlog\Blog\Exceptions\CommandException;
 use Veliafar\PhpBlog\Blog\Exceptions\InvalidArgumentException;
@@ -130,6 +134,80 @@ class CreateUserCommandTest extends TestCase
       'last_name' => 'Nikitin',
       'password' => 'password'
     ]));
+    $this->assertTrue($usersRepository->wasCalled());
+  }
+
+  /**
+   * @throws ExceptionInterface
+   */
+  public function testItRequiresLastNameCreateUserConsole(): void
+  {
+    // Тестируем новую команду
+    $command = new CreateUserConsole(
+      $this->makeUsersRepository(),
+    );
+    // Меняем тип ожидаемого исключения ..
+    $this->expectException(RuntimeException::class);
+    // .. и его сообщение
+    $this->expectExceptionMessage(
+      'Not enough arguments (missing: "last_name").'
+    );
+    // Запускаем команду методом run вместо handle
+    $command->run(
+      new ArrayInput([
+        'username' => 'Ivan',
+        'password' => 'some_password',
+        'first_name' => 'Ivan',
+      ]),
+      // Передаём также объект,
+      // реализующий контракт OutputInterface
+      // Нам подойдёт реализация,
+      // которая ничего не делает
+      new NullOutput()
+    );
+  }
+
+  /**
+   * @throws ExceptionInterface
+   */
+  public function testItSavesUserToRepository(): void
+  {
+    $usersRepository = new class implements UserRepositoryInterface {
+
+      private bool $called = false;
+
+      public function save(User $user): void
+      {
+        $this->called = true;
+      }
+
+      public function get(UUID $uuid): User
+      {
+        throw new UserNotFoundException("Not found");
+      }
+
+      public function getByUsername(string $username): User
+      {
+        throw new UserNotFoundException("Not found");
+      }
+
+      public function wasCalled(): bool
+      {
+        return $this->called;
+      }
+    };
+    $command = new CreateUserConsole(
+      $usersRepository
+    );
+    $command->run(
+      new ArrayInput([
+        'username' => 'Ivan',
+        'password' => 'some_password',
+        'first_name' => 'Ivan',
+        'last_name' => 'Nikitin',
+      ]),
+      new NullOutput()
+    );
     $this->assertTrue($usersRepository->wasCalled());
   }
 }
